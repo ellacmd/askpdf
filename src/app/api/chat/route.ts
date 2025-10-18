@@ -79,10 +79,11 @@ Please answer questions based on this content. If the answer cannot be found in 
                 'X-Accel-Buffering': 'no',
             },
         });
-    } catch (error: any) {
+    } catch (error) {
         console.error('OpenAI API error:', error);
 
-        if (error?.status === 401) {
+        const err = error as { status?: number; message?: string };
+        if (err?.status === 401) {
             return new Response(
                 JSON.stringify({ error: 'Invalid OpenAI API key' }),
                 { status: 401, headers: { 'Content-Type': 'application/json' } }
@@ -91,7 +92,7 @@ Please answer questions based on this content. If the answer cannot be found in 
 
         return new Response(
             JSON.stringify({
-                error: error?.message || 'Failed to get response from AI',
+                error: err?.message || 'Failed to get response from AI',
             }),
             { status: 500, headers: { 'Content-Type': 'application/json' } }
         );

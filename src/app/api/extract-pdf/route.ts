@@ -38,11 +38,12 @@ export async function POST(request: NextRequest) {
         // Use pdf2json which works in Node.js
         const PDFParser = (await import('pdf2json')).default;
 
-        return new Promise((resolve) => {
+        return new Promise<NextResponse>((resolve) => {
             const pdfParser = new PDFParser();
 
-            pdfParser.on('pdfParser_dataError', (errData: any) => {
-                console.error('PDF parsing error:', errData.parserError);
+            pdfParser.on('pdfParser_dataError', (errData: { parserError?: Error } | Error) => {
+                const errorMessage = errData instanceof Error ? errData.message : errData.parserError?.message || 'Unknown error';
+                console.error('PDF parsing error:', errorMessage);
                 resolve(
                     NextResponse.json(
                         { error: 'Failed to parse PDF' },
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
                 );
             });
 
-            pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
+            pdfParser.on('pdfParser_dataReady', (pdfData: { Pages?: Array<{ Texts?: Array<{ R?: Array<{ T?: string }> }> }> }) => {
                 try {
                     // Extract text from all pages
                     let fullText = '';
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
                                                         decodeURIComponent(
                                                             r.T
                                                         ) + ' ';
-                                                } catch (e) {
+                                                } catch {
                                                     // If decoding fails, use the raw text
                                                     fullText += r.T + ' ';
                                                 }

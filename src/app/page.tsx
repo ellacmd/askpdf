@@ -50,8 +50,9 @@ export default function Home() {
                     timestamp: new Date(),
                 },
             ]);
-        } catch (err: any) {
-            setError(err.message || 'Failed to upload PDF');
+        } catch (err) {
+            const error = err as { message?: string };
+            setError(error.message || 'Failed to upload PDF');
             console.error('Upload error:', err);
         } finally {
             setIsUploading(false);
@@ -155,8 +156,9 @@ export default function Home() {
             };
 
             await processStream();
-        } catch (err: any) {
-            setError(err.message || 'Failed to get response from AI');
+        } catch (err) {
+            const error = err as { message?: string };
+            setError(error.message || 'Failed to get response from AI');
             console.error('Chat error:', err);
             // Remove the empty assistant message on error
             setMessages((prev) =>
